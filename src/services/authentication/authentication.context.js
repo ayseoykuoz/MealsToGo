@@ -1,12 +1,8 @@
 import React, { useState, createContext, useEffect } from 'react';
-import {
-  signOut,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import { loginRequest } from './authentication.service';
-import { auth } from '../../infrastructure/firebase/firebase';
+import { auth } from '../../infrastructure/firebase/firebase'; // Import the auth object from firebase.js
+import { loginRequest } from './authentication.service'; // Assuming your login service
 
+// Create the Authentication Context
 export const AuthenticationContext = createContext();
 
 export const AuthenticationContextProvider = ({ children }) => {
@@ -14,24 +10,26 @@ export const AuthenticationContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
 
-  // Use useEffect to manage Firebase auth state
+  // Firebase Auth State Listener (onAuthStateChanged)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (usr) => {
+    const unsubscribe = auth.onAuthStateChanged((usr) => {
       if (usr) {
         setUser(usr);
         setIsLoading(false);
       } else {
+        setUser(null);
         setIsLoading(false);
       }
     });
 
-    // Cleanup subscription on component unmount
+    // Clean up the subscription when the component unmounts
     return unsubscribe;
   }, []);
 
+  // Login function using Firebase Auth
   const onLogin = (email, password) => {
     setIsLoading(true);
-    loginRequest(auth, email, password)
+    loginRequest(auth, email, password) // Use loginRequest with the auth object
       .then((u) => {
         setUser(u);
         setIsLoading(false);
@@ -42,6 +40,7 @@ export const AuthenticationContextProvider = ({ children }) => {
       });
   };
 
+  // Register function using Firebase Auth
   const onRegister = (email, password, repeatedPassword) => {
     setIsLoading(true);
     if (password !== repeatedPassword) {
@@ -49,7 +48,9 @@ export const AuthenticationContextProvider = ({ children }) => {
       setIsLoading(false);
       return;
     }
-    createUserWithEmailAndPassword(auth, email, password)
+
+    auth
+      .createUserWithEmailAndPassword(email, password) // Register new user
       .then((u) => {
         setUser(u);
         setIsLoading(false);
@@ -60,10 +61,13 @@ export const AuthenticationContextProvider = ({ children }) => {
       });
   };
 
+  // Logout function using Firebase Auth
   const onLogout = () => {
-    signOut(auth).then(() => {
+    setIsLoading(true);
+    auth.signOut().then(() => {
       setUser(null);
       setError(null);
+      setIsLoading(false);
     });
   };
 
