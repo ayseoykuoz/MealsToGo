@@ -7,13 +7,14 @@ import {
   Oswald_400Regular,
 } from '@expo-google-fonts/oswald';
 import { useFonts as useLato, Lato_400Regular } from '@expo-google-fonts/lato';
+import { Navigation } from './src/infrastructure/navigation';
 
 import { theme } from './src/infrastructure/theme';
 import { LocationContextProvider } from './src/services/location/location.context';
 import { RestaurantsContextProvider } from './src/services/restaurants/restaurants.context';
-import { Navigation } from './src/infrastructure/navigation';
 import { FavouritesContextProvider } from './src/services/favourites/favourites.context';
-
+import { AuthenticationContextProvider } from './src/services/authentication/authentication.context';
+import { auth, firestore } from './src/infrastructure/firebase/firebase';
 export default function App() {
   const [oswaldLoaded] = useOswald({
     Oswald_400Regular,
@@ -30,13 +31,15 @@ export default function App() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <FavouritesContextProvider>
-          <LocationContextProvider>
-            <RestaurantsContextProvider>
-              <Navigation />
-            </RestaurantsContextProvider>
-          </LocationContextProvider>
-        </FavouritesContextProvider>
+        <AuthenticationContextProvider>
+          <FavouritesContextProvider>
+            <LocationContextProvider>
+              <RestaurantsContextProvider>
+                <Navigation />
+              </RestaurantsContextProvider>
+            </LocationContextProvider>
+          </FavouritesContextProvider>
+        </AuthenticationContextProvider>
       </ThemeProvider>
       <ExpoStatusBar style="auto" />
     </>
